@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+require("console.table");
 
 var connection = mysql.createConnection({
 	host: "localhost",
@@ -11,21 +12,16 @@ var connection = mysql.createConnection({
 	database: "bamazon"
 });
 
-connection.connect(function(err) {
-	if (err) throw err;
-
-	start();
-});
-
 function start() {
 	connection.query("SELECT * FROM product", function(err, res) {
 		if (err) throw err;
 		console.log("------------BAMAZON-------------")
 		console.log("--------------------------------")
 
-		for (var i = 0; i < res.length; i++) {
-			console.log("ID: " + res[i].item_id + " | " + "Product: " + res[i].product_name + " | " + "Department: " + res[i].department_name + " | " + "Price: " + res[i].price + " | " + "In stock: " + res[i].stock_quantity);
-		}
+		console.table(res);
+		// for (var i = 0; i < res.length; i++) {
+		// 	console.log("ID: " + res[i].item_id + " | " + "Product: " + res[i].product_name + " | " + "Department: " + res[i].department_name + " | " + "Price: " + res[i].price + " | " + "In stock: " + res[i].stock_quantity);
+		// }
 		console.log("--------------------------------")
 	
 
@@ -33,7 +29,7 @@ function start() {
 		.prompt([{
 			name: "idOfProduct",
 			type: "input",
-			message: "What is the ID of the product you wish to purchase?"
+			message: "What is the ID of the product you wish to purchase?",
 			validate: function(value) {
 				if (isNaN(value) === false && parseInt(value) <= res.length && parseInt(value) > 0) {
 					return true;
@@ -45,7 +41,7 @@ function start() {
 		{
 			name: "productQuantity",
 			type: "input",
-			message: "How many of this product would you like to purchase?"
+			message: "How many of this product would you like to purchase?",
 			validate: function(value) {
 				if (isNaN(value)) {
 					return false;
@@ -55,14 +51,46 @@ function start() {
 			}
 		}])
 		.then(function(answer) {
-			
+			var productID = (answer.idOfProduct)-1;
+			var quantity = parseInt(answer.productQuantity);
+			var total = parseFloat(((res[productID].price)*quantity).toFixed(2));
 
+			if(res[productID].stock_quantity >= quantity) {
+				connection.query("UPDATE Product SET ? WHERE ?", [
+					{stock_quantity: (res[productID].stock_quantity - quantity)},
+					{item_id: answer.idOfProduct}
+				], function(err, res) {
+					if (err) throw err;
+					console.log("Thank you! Your total today is $" + total.toFixed(2));
+				});
 
+			} else {
+				console.log("We're sorry, the product you are looking for is out of stock!");
+			}
+
+			reprompt();
 
 		});
 
 	});
 }
+
+function reprompt() {
+	inquirer.prompt([{
+		name: "continue",
+		type: "confirm",
+		message: "Would you like to make another purchase?"
+	}])
+	.then(function(answer) {
+		if(answer.continue) {
+			start();
+		} else {
+			console.log("Thank you for using BAMAZON!");
+		}
+	});
+}
+
+start();
 
 
 //CONSOLE.TABLE PACKAGE
