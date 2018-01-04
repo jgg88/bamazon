@@ -5,9 +5,7 @@ require("console.table");
 var connection = mysql.createConnection({
 	host: "localhost",
 	port: 3306,
-
 	user: "root",
-
 	password: "",
 	database: "bamazon"
 });
@@ -17,11 +15,7 @@ function start() {
 		if (err) throw err;
 		console.log("------------BAMAZON-------------")
 		console.log("--------------------------------")
-
 		console.table(res);
-		// for (var i = 0; i < res.length; i++) {
-		// 	console.log("ID: " + res[i].item_id + " | " + "Product: " + res[i].product_name + " | " + "Department: " + res[i].department_name + " | " + "Price: " + res[i].price + " | " + "In stock: " + res[i].stock_quantity);
-		// }
 		console.log("--------------------------------")
 	
 
@@ -91,6 +85,3 @@ function reprompt() {
 }
 
 start();
-
-
-//CONSOLE.TABLE PACKAGE
