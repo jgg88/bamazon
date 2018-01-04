@@ -61,14 +61,14 @@ function start() {
 					{item_id: answer.idOfProduct}
 				], function(err, res) {
 					if (err) throw err;
-					console.log("Thank you! Your total today is $" + total.toFixed(2));
+					console.log("\nThank you! Your total is $" + total.toFixed(2) + ".\n");
+					reprompt();
 				});
 
 			} else {
 				console.log("We're sorry, the product you are looking for is out of stock!");
+				reprompt();
 			}
-
-			reprompt();
 
 		});
 
